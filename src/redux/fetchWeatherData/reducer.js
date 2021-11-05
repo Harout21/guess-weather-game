@@ -2,6 +2,7 @@ import * as actions from './actionTypes';
 
 const initialState = {
     data: {},
+    error: '',
 };
 
 export const fetchDataReducer = (state = initialState, action) => {
@@ -10,6 +11,7 @@ export const fetchDataReducer = (state = initialState, action) => {
             return {
                 ...state,
                 loading: true,
+                error: '',
             };
         case actions.GET_DATA_SUCCESS:
             return {
@@ -19,7 +21,6 @@ export const fetchDataReducer = (state = initialState, action) => {
             };
         case actions.GET_DATA_FAIL:
             return {
-                data: {},
                 error: action.payload,
                 loading: false,
             };

@@ -5,26 +5,37 @@ import {getDataAction} from "../redux/fetchWeatherData/actions";
 const WeatherGuessPage = () => {
     const dispatch = useDispatch()
     const fetchedData = useSelector(state => state.fetchDataReducer.data)
+    const errorMessage = useSelector(state => state.fetchDataReducer.error) || ''
     const [cityName, setCityName] = useState('')
     const [guessNumber, setGuessNumber] = useState('')
     const [openPopUp, setOpenPopUp] = useState(false)
     const [historyBox, setHistoryBox] = useState([])
     const temp = parseInt(fetchedData?.main?.temp - 273.15).toFixed(0)
     const difference = Math.abs(temp - guessNumber)
-    const filterIsRight = historyBox.filter((item) => item.isRight === true)
+    const filterIsRight = historyBox.filter((item) => !!item.isRight)
 
     const checkTemp = () => {
         if (!!cityName && !!guessNumber) {
             dispatch(getDataAction(cityName))
-        } else {
+        }
+        if(!cityName && !guessNumber) {
             alert('fill two inputs')
         }
     }
 
     useEffect(() => {
-        if (!!guessNumber) {
-            setHistoryBox([...historyBox, {guessNumber, temp, isRight: difference > 5 ? false : true}]);
+        if (errorMessage.cod === "404") {
+            alert(errorMessage.message)
+            setGuessNumber('')
+            setCityName('')
         }
+    }, [errorMessage])
+
+    useEffect(() => {
+        if (!!guessNumber && errorMessage.cod !== "404") {
+            setHistoryBox([...historyBox, {guessNumber, temp, isRight: difference <= 5}]);
+        }
+
         if (filterIsRight?.length >= 2) {
             setOpenPopUp(val => !val)
             setHistoryBox([])
@@ -37,7 +48,7 @@ const WeatherGuessPage = () => {
         <div className="container">
             <div className="mainBox">
                 {
-                    openPopUp &&  <h1>
+                    openPopUp && <h1>
                         You Won
                     </h1>
                 }
@@ -49,7 +60,7 @@ const WeatherGuessPage = () => {
                 />
                 <input
                     placeholder='Your guess text box'
-                    value={guessNumber}
+                    value={guessNumber || ''}
                     onChange={(e) => setGuessNumber(e.target.value)}
                 />
                 <button onClick={checkTemp}>
